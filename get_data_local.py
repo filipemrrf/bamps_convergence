@@ -45,7 +45,7 @@ os.makedirs("results/hyp_wave_convergence/")
 
 for i in range(runs):
     # Calculate the number of points in each dimension for the current resolution
-    nxyz = base_nxyz * (2 ** i)
+    nxyz = base_nxyz + (2 * i)
     
     # Create the command to run the par_file_writer.py script
     cmd = f"python3 par_file_writer.py --nxyz {nxyz} --tmax {tmax} --out_every {out_every}"

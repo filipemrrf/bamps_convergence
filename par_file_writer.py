@@ -140,7 +140,7 @@ PAR_FILE.write(f"output.0d.integral = ana.Bx ana.By ana.Bz\n")
 
 PAR_FILE.write(f"output.1d.every = {out_every}\n")
 PAR_FILE.write(f"output.1d.dim   = x y z\n")
-PAR_FILE.write(f"output.1d       = u.psi\n")
+PAR_FILE.write(f"output.1d       = u.psi ana.Bx ana.By ana.Bz\n")
 
 # Closes the file
 PAR_FILE.close()
