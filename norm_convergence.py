@@ -2,8 +2,8 @@
  " @file norm_convergence.py
  " @author Filipe Ficalho (filipe.ficalho@tecnico.ulisboa.pt)
  " @brief Script to plot the norm of the constraints as a function of time
- " @version 1.0
- " @date 2025-05-21
+ " @version 1.1
+ " @date 2025-06-17
  " 
  " @copyright Copyright (c) 2025
  " 
@@ -55,28 +55,40 @@ for constraint in ['Bx', 'By', 'Bz']:
     # Shows the current constraint
     print(f"Processing {constraint}...")
 
-    # Read the data from the specified folder
+    # Create a figure for the plot
+    plt.figure(figsize=(8, 6))
+
+    # Collect (nxyz, t, C) for each resolution
+    data = []
     for resolution in os.listdir(folder):
-        # Skip folders created by this script
         if resolution.startswith("norm_convergence"):
             continue
-
-        # Initialize the lists to store the data
-        t = []
-        C = []
-
-        # Check if the resolution is a directory
         if os.path.isdir(f"{folder}/{resolution}"):
-            # Read the data from the file
+            # Extract nxyz as an integer
+            nxyz_str = resolution.lstrip('hyp_wave_convergence_nxyz')
+            try:
+                nxyz = int(nxyz_str)
+            except ValueError:
+                continue  # skip if not a valid integer
+            t = []
+            C = []
             read_file(f"{folder}/{resolution}/output_0d/integral/ana.{constraint}", t, C)
+            data.append((nxyz, t, C))
 
-        # Calculate the norm as a function of time
-        plt.plot(t, C, label=f"nxyz={resolution.lstrip('hyp_wave_convergence_nxyz')}")
-            
+    # Sort by nxyz
+    data.sort(key=lambda x: x[0])
+
+    # Plot in order
+    for nxyz, t, C in data:
+        plt.plot(t, C, label=f"nxyz={nxyz}")
+    
     # Plot the norms
     plt.xlabel("Time")
     plt.ylabel(f"Norm of {constraint}")
+    plt.yscale('log')
     plt.legend()
+    plt.grid(True, which="both", ls="--", lw=0.5)
+    plt.tight_layout()
     plt.savefig(f"{folder}/norm_convergence/norm_{constraint}.png")
 
     # Clear the plot

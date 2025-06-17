@@ -2,8 +2,8 @@
  " @file get_data_local.py
  " @author Filipe Ficalho (filipe.ficalho@tecnico.ulisboa.pt)
  " @brief Script to run the hyperboloidal wave equation project in bamps with several resolutions on my own computer
- " @version 1.0
- " @date 2025-05-20
+ " @version 1.1
+ " @date 2025-06-17
  " 
  " @copyright Copyright (c) 2025
  " 
@@ -21,6 +21,8 @@ parser.add_argument('--base_nxyz', type=int, required=True, help='Number of poin
 parser.add_argument('--cartoon', type=str, help='Cartoon axis (default: none)')
 parser.add_argument('--reflect', type=str, help='Reflect axis (default: none)')
 parser.add_argument('--tmax', type=float, required=True, help='Maximum time for the simulation')
+parser.add_argument('--gamma1', type=float, default=-1, help='Gamma1 parameter for the project (default: -1)')
+parser.add_argument('--gamma2', type=float, default=0, help='Gamma2 parameter for the project (default: 0)')
 parser.add_argument('--out_every', type=int, default=10, help='Output frequency (default: 10)')
 parser.add_argument('--np', type=int, default=1, help='Number of processors to use (default: 1)')
 
@@ -49,6 +51,10 @@ for i in range(runs):
     
     # Create the command to run the par_file_writer.py script
     cmd = f"python3 par_file_writer.py --nxyz {nxyz} --tmax {tmax} --out_every {out_every}"
+    if args.gamma1:
+        cmd += f" --gamma1 {args.gamma1}"
+    if args.gamma2:
+        cmd += f" --gamma2 {args.gamma2}"
     if args.cartoon:
         cmd += f" --cartoon {cartoon}"
     if args.reflect:

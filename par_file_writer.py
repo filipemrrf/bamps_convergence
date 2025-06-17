@@ -2,8 +2,8 @@
  " @file par_file_writer.py
  " @author Filipe Ficalho (filipe.ficalho@tecnico.ulisboa.pt)
  " @brief Writes a parameter file for the hyperboloidal wave equation project in bamps
- " @version 1.0
- " @date 2025-05-20
+ " @version 1.1
+ " @date 2025-06-17
  " 
  " @copyright Copyright (c) 2025
  " 
@@ -20,12 +20,16 @@ parser.add_argument('--cartoon', type=str, help='Cartoon axis (default: none)')
 parser.add_argument('--reflect', type=str, help='Reflect axis (default: none)')
 parser.add_argument('--tmax', type=float, required=True, help='Maximum time for the simulation')
 parser.add_argument('--out_every', type=int, default=10, help='Output frequency (default: 10)')
+parser.add_argument('--gamma1', type=float, default=-1, help='Gamma1 parameter for the project (default: -1)')
+parser.add_argument('--gamma2', type=float, default=0, help='Gamma2 parameter for the project (default: 0)')
 
 # Parse the arguments
 args = parser.parse_args()
 nxyz = args.nxyz  # Number of points in each dimension
 tmax = args.tmax  # Maximum time for the simulation
 out_every = args.out_every  # Output frequency
+gamma1 = args.gamma1  # Gamma2 parameter for the project
+gamma2 = args.gamma2  # Gamma2 parameter for the project
 
 # Opens the file in write mode
 PAR_FILE = open(f"hyp_wave_convergence_nxyz{nxyz}.par", 'w')
@@ -47,8 +51,8 @@ PAR_FILE.write("\n")
 PAR_FILE.write("grid = cubedball\n")
 PAR_FILE.write("\n")
 
-PAR_FILE.write("grid.cube.max         = 1.5\n")
-PAR_FILE.write("grid.cubesphere.max.x = 4.5\n")
+PAR_FILE.write("grid.cube.max         = 2\n")
+PAR_FILE.write("grid.cubesphere.max.x = 6\n")
 PAR_FILE.write("grid.sphere.max.x     = 10\n")
 PAR_FILE.write("\n")
 
@@ -95,7 +99,7 @@ PAR_FILE.write("################################################################
 PAR_FILE.write("\n")
 
 PAR_FILE.write(f"evolve           = 1\n")
-PAR_FILE.write(f"evolve.dtfactor  = .25\n")
+PAR_FILE.write(f"evolve.dtfactor  = .2\n")
 PAR_FILE.write(f"evolve.finaltime = {tmax}\n")
 PAR_FILE.write("\n")
 
@@ -121,7 +125,11 @@ PAR_FILE.write("hyp_wave.boundary.inner = none\n")
 PAR_FILE.write("hyp_wave.boundary.outer = none\n")
 PAR_FILE.write("\n")
 
-PAR_FILE.write("hyp_wave.scri = 10\n")
+
+PAR_FILE.write("hyp_wave.metric = hyp_minkowski\n")
+PAR_FILE.write("hyp_wave.scri   = 10\n")
+PAR_FILE.write(f"hyp_wave.gamma1 = {gamma1}\n")
+PAR_FILE.write(f"hyp_wave.gamma2 = {gamma2}\n")
 PAR_FILE.write("\n")
 
 # Writes the output parameters
