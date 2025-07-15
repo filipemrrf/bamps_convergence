@@ -11,6 +11,7 @@
 
 import os
 import argparse
+import re
 import matplotlib.pyplot as plt
 
 """ Function to get the data from the specified file """
@@ -50,6 +51,7 @@ folder = args.folder[0].rstrip('/')  # Folder of the data
 if not os.path.exists(f"{folder}/norm_convergence/"):
     os.makedirs(f"{folder}/norm_convergence/")
 
+
 # Loops through the constraints
 for constraint in ['Bx', 'By', 'Bz']:
     # Shows the current constraint
@@ -64,12 +66,11 @@ for constraint in ['Bx', 'By', 'Bz']:
         if resolution.startswith("norm_convergence"):
             continue
         if os.path.isdir(f"{folder}/{resolution}"):
-            # Extract nxyz as an integer
-            nxyz_str = resolution.lstrip('hyp_wave_convergence_nxyz')
-            try:
-                nxyz = int(nxyz_str)
-            except ValueError:
-                continue  # skip if not a valid integer
+            # Extract nxyz as an integer using regex
+            match = re.search(r'nxyz(\d+)', resolution)
+            if not match:
+                continue  # skip if not found
+            nxyz = int(match.group(1))
             t = []
             C = []
             read_file(f"{folder}/{resolution}/output_0d/integral/ana.{constraint}", t, C)
@@ -93,3 +94,32 @@ for constraint in ['Bx', 'By', 'Bz']:
 
     # Clear the plot
     plt.clf()
+
+
+# amr plot hack
+#for constraint in ['Bx', 'By', 'Bz']:
+#    print(f"Processing {constraint}...")
+#    plt.figure(figsize=(8, 6))
+
+    # Hack: look for AMR and non-AMR folders
+#    amr_labels = [("hyp_cubic_wave_convergence_nxyz", "w/o AMR"),
+#                  ("hyp_cubic_wave_convergence_amr_nxyz", "w/ AMR")]
+
+#    for prefix, label in amr_labels:
+        # Find the folder that matches the prefix
+#        for resolution in os.listdir(folder):
+#            if resolution.startswith(prefix) and os.path.isdir(f"{folder}/{resolution}"):
+#                t = []
+#                C = []
+#                read_file(f"{folder}/{resolution}/output_0d/integral/ana.{constraint}", t, C)
+#                plt.plot(t, C, label=label)
+#                break  # Only plot the first match for each type
+
+#    plt.xlabel("Time")
+#    plt.ylabel(f"Norm of {constraint}")
+#    plt.yscale('log')
+#    plt.legend()
+#    plt.grid(True, which="both", ls="--", lw=0.5)
+#    plt.tight_layout()
+#    plt.savefig(f"{folder}/norm_convergence/norm_{constraint}.png")
+#    plt.clf()
