@@ -10,8 +10,13 @@
 """
 
 import os
+import glob
 
 def check_blowup(A: float) -> bool:
+    # Checks if the program exited with an error
+    if glob.glob(f"temp_results/hyp_cubic_wave_blowup/hyp_cubic_wave_A{A}/ERROREXIT.*"):
+        return True
+    
     for field in ["psi", "pi", "phix", "phiy", "phiz"]:
         # Opens the output file for the field 
         OUT_FILE = open(f"temp_results/hyp_cubic_wave_blowup/hyp_cubic_wave_A{A}/output_0d/{blowup_criteria}/u.{field}", 'r')
