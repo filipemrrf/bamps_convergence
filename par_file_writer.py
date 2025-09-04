@@ -2,8 +2,8 @@
  " @file par_file_writer.py
  " @author Filipe Ficalho (filipe.ficalho@tecnico.ulisboa.pt)
  " @brief Writes a parameter file for the hyperboloidal wave equation project in bamps
- " @version 1.1
- " @date 2025-06-17
+ " @version 3.0
+ " @date 2025-09-04
  " 
  " @copyright Copyright (c) 2025
  " 
@@ -15,18 +15,21 @@ import argparse
 parser = argparse.ArgumentParser(description='Process the arguments to get the data')
 
 # Add arguments to the parser
-parser.add_argument('--nxyz', type=int, required=True, help='Number of points in each dimension')
-parser.add_argument('--amr', type=bool, default=False, help='AMR (default: False)')
+parser.add_argument('--scri', type=float, default=30.0, help='Location of scri (default: 30.0)')
 parser.add_argument('--cartoon', type=str, help='Cartoon axis (default: none)')
 parser.add_argument('--reflect', type=str, help='Reflect axis (default: none)')
+parser.add_argument('--amr', type=bool, default=False, help='AMR (default: False)')
+parser.add_argument('--nh', type=int, default=2, help='Number of subdivisions per patch')
+parser.add_argument('--nxyz', type=int, default=15, help='Number of points in each dimension')
 parser.add_argument('--tmax', type=float, required=True, help='Maximum time for the simulation')
+parser.add_argument('--amp', type=float, default=1.0, help='Amplitude of the initial data (default: 1.0)')
+parser.add_argument('--layers', type=bool, default=False, help='Use layers (default: False)')
+parser.add_argument('--gamma1', type=float, default=-1, help='Gamma1 parameter for the project (default: -1)')
+parser.add_argument('--gamma2', type=float, default=2, help='Gamma2 parameter for the project (default: 2)')
+parser.add_argument('--source', type=str, default='none', help='Source type (default: none)')
 parser.add_argument('--output', type=str, required=True, help='Output fields')
 parser.add_argument('--out_0d_every', type=int, default=10, help='Output frequency (default: 10)')
 parser.add_argument('--out_1d_every', type=int, default=10, help='Output frequency (default: 10)')
-parser.add_argument('--gamma1', type=float, default=-1, help='Gamma1 parameter for the project (default: -1)')
-parser.add_argument('--gamma2', type=float, default=0, help='Gamma2 parameter for the project (default: 0)')
-parser.add_argument('--source', type=str, default='none', help='Source type (default: none)')
-parser.add_argument('--amp', type=float, default=1.0, help='Amplitude of the initial data (default: 1.0)')
 
 # Parse the arguments
 args = parser.parse_args()
@@ -53,12 +56,12 @@ PAR_FILE.write("\n")
 
 PAR_FILE.write("grid.cube.max         = 2\n")
 PAR_FILE.write("grid.cubesphere.max.x = 6\n")
-PAR_FILE.write("grid.sphere.max.x     = 10\n")
+PAR_FILE.write(f"grid.sphere.max.x     = {args.scri}\n")
 PAR_FILE.write("\n")
 
-PAR_FILE.write("grid.sub.xyz          = 4\n")
-PAR_FILE.write("grid.cubesphere.sub.x = 6\n")
-PAR_FILE.write("grid.sphere.sub.x     = 8\n")
+PAR_FILE.write(f"grid.sub.xyz          = {args.nh}\n")
+PAR_FILE.write(f"grid.cubesphere.sub.x = {args.nh}\n")
+PAR_FILE.write(f"grid.sphere.sub.x     = {int(2*args.nh*args.scri/10)}\n")
 PAR_FILE.write("\n")
 
 if args.cartoon:
@@ -150,12 +153,10 @@ PAR_FILE.write("\n")
 PAR_FILE.write("project = hyp_wave\n")
 PAR_FILE.write("\n")
 
-PAR_FILE.write(f"hyp_wave.initialdata                = gaussian\n")
-PAR_FILE.write(f"hyp_wave.initialdata.gaussian.amp   = {args.amp}\n")
-PAR_FILE.write(f"hyp_wave.initialdata.gaussian.sigma = 1\n")
-PAR_FILE.write(f"hyp_wave.initialdata.gaussian.x0    = 0\n")
-PAR_FILE.write(f"hyp_wave.initialdata.gaussian.y0    = 0\n")
-PAR_FILE.write(f"hyp_wave.initialdata.gaussian.z0    = 0\n")
+PAR_FILE.write(f"hyp_wave.initialdata                     = gaussianshell\n")
+PAR_FILE.write(f"hyp_wave.initialdata.gaussianshell.amp   = {args.amp}\n")
+PAR_FILE.write(f"hyp_wave.initialdata.gaussianshell.sigma = 1\n")
+PAR_FILE.write(f"hyp_wave.initialdata.gaussianshell.r0    = 0\n")
 PAR_FILE.write(f"\n")
 
 PAR_FILE.write("hyp_wave.boundary.patch = penalty\n")
@@ -163,12 +164,16 @@ PAR_FILE.write("hyp_wave.boundary.inner = none\n")
 PAR_FILE.write("hyp_wave.boundary.outer = none\n")
 PAR_FILE.write("\n")
 
+if args.layers:
+    PAR_FILE.write(f"hyp_wave.metric = hyp_layers_minkowski\n")
+    PAR_FILE.write(f"hyp_wave.Rinterface = 10\n")
+    PAR_FILE.write(f"hyp_wave.translen = 10\n")
+else:
+    PAR_FILE.write(f"hyp_wave.metric = hyp_minkowski\n")
 
-PAR_FILE.write(f"hyp_wave.metric = hyp_minkowski\n")
-PAR_FILE.write(f"hyp_wave.Rinterface = 6\n")
-PAR_FILE.write(f"hyp_wave.scri   = 10\n")
-PAR_FILE.write(f"hyp_wave.gamma1 = {args.gamma1}\n")
-PAR_FILE.write(f"hyp_wave.gamma2 = {args.gamma2}\n")
+PAR_FILE.write(f"hyp_wave.scri    = {args.scri}\n")
+PAR_FILE.write(f"hyp_wave.gamma1  = {args.gamma1}\n")
+PAR_FILE.write(f"hyp_wave.gamma2  = {args.gamma2}\n")
 PAR_FILE.write(f"hyp_wave.sources = {args.source}\n")
 PAR_FILE.write("\n")
 
@@ -194,7 +199,7 @@ if args.output == "convergence":
         PAR_FILE.write(f"output.1d.dim   = x z\n")
     else:
         PAR_FILE.write(f"output.1d.dim   = x y z\n")
-    PAR_FILE.write(f"output.1d       = u.psi u.pi u.phix u.phiy u.phiz\n")
+    PAR_FILE.write(f"output.1d       = u.psi u.pi u.phix u.phiy u.phiz ana.Bx ana.By ana.Bz ana.cpx ana.cmx\n")
 
 elif args.output == "blowup":
     PAR_FILE.write(f"output.0d.every    = {args.out_0d_every}\n")
