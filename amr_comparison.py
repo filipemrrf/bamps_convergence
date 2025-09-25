@@ -1,8 +1,8 @@
 """
  " @file norm_convergence.py
  " @author Filipe Ficalho (filipe.ficalho@tecnico.ulisboa.pt)
- " @brief Script to plot the norm of the constraints as a function of time
- " @version 2.0
+ " @brief Script to plot the norm of the constraints as a function of time to compare amr and non-amr
+ " @version 1.0
  " @date 2025-09-04
  " 
  " @copyright Copyright (c) 2025
@@ -60,39 +60,33 @@ for constraint in ['Bx', 'By', 'Bz']:
     # Create a figure for the plot
     plt.figure(figsize=(8, 6))
 
-    # Collect (n, t, C) for each resolution
+    # Collect (nxyz, t, C) for each resolution
     data = []
-    for resolution in os.listdir(folder):
-        if resolution.startswith("norm_convergence"):
-            continue
-        if os.path.isdir(f"{folder}/{resolution}"):
-            # Extract nxyz as an integer using regex
-            match = re.search(r'(\d+)', resolution)
-            if not match:
-                continue  # skip if not found
-            n = int(match.group(1))
-            t = []
-            C = []
-            read_file(f"{folder}/{resolution}/output_0d/integral/ana.{constraint}", t, C)
-            data.append((n, t, C))
 
-    # Sort by nxyz
-    data.sort(key=lambda x: x[0])
+    # amr plot hack
+    for constraint in ['Bx', 'By', 'Bz']:
+        print(f"Processing {constraint}...")
+        plt.figure(figsize=(8, 6))
 
-    # Plot in order
-    for n, t, C in data:
-        plt.plot(t, C, label=f"n={n}")
-    
-    # Plot the norms
-    plt.xlabel("t", fontsize=14)
-    plt.ylabel(f"$||B_{constraint[1]}||_{{L^2}}$", fontsize=14)
-    plt.yscale('log')
-    #plt.ylim(1e-12, 1e-2)
+        # Hack: look for AMR and non-AMR folders
+        amr_labels = [("hyp_cubic_wave_convergence_nxyz", "w/o AMR"),
+                      ("hyp_cubic_wave_convergence_amr_nxyz", "w/ AMR")]
 
-    plt.legend(fontsize=12)
-    plt.grid(True, which="both", ls="--", lw=0.5)
-    plt.tight_layout()
-    plt.savefig(f"{folder}/norm_convergence/norm_{constraint}.png")
+        for prefix, label in amr_labels:
+            # Find the folder that matches the prefix
+            for resolution in os.listdir(folder):
+                if resolution.startswith(prefix) and os.path.isdir(f"{folder}/{resolution}"):
+                    t = []
+                    C = []
+                    read_file(f"{folder}/{resolution}/output_0d/integral/ana.{constraint}", t, C)
+                    plt.plot(t, C, label=label)
+                    break  # Only plot the first match for each type
 
-    # Clear the plot
-    plt.clf()
+        plt.xlabel("Time")
+        plt.ylabel(f"Norm of {constraint}")
+        plt.yscale('log')
+        plt.legend()
+        plt.grid(True, which="both", ls="--", lw=0.5)
+        plt.tight_layout()
+        plt.savefig(f"{folder}/norm_convergence/norm_{constraint}.png")
+        plt.clf()

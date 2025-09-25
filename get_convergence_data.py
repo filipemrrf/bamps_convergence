@@ -26,6 +26,7 @@ parser.add_argument('--amr', type=bool, default=False, help='AMR (default: False
 parser.add_argument('--base_nxyz', type=int, default=15, help='Number of points in each dimension')
 parser.add_argument('--tmax', type=float, required=True, help='Maximum time for the simulation')
 parser.add_argument('--amp', type=float, default=1.0, help='Amplitude of the initial data (default: 1.0)')
+parser.add_argument('--sigma', type=float, default=1.0, help='Standard deviation of the initial data (default: 1.0)')
 parser.add_argument('--layers', type=bool, default=False, help='Use layers (default: False)')
 parser.add_argument('--gamma1', type=float, default=-1, help='Gamma1 parameter for the project (default: -1)')
 parser.add_argument('--gamma2', type=float, default=2, help='Gamma2 parameter for the project (default: 2)')
@@ -66,7 +67,7 @@ nxyz = args.base_nxyz
 # Loop over the number of runs
 for i in range(args.runs):    
     # Create the command to run the par_file_writer.py script
-    cmd = f"python3 par_file_writer.py --nh {nh} --nxyz {nxyz} --tmax {args.tmax} --output convergence --out_0d_every {args.out_every} --out_1d_every {args.out_every} --scri {args.scri}"
+    cmd = f"python3 par_file_writer.py --nh {nh} --nxyz {nxyz} --tmax {args.tmax} --output convergence --out_0d_every {args.out_every} --out_1d_every {args.out_every} --scri {args.scri} --gamma1 {args.gamma1} --gamma2 {args.gamma2} --source {args.source}"
     if args.cartoon:
         cmd += f" --cartoon {args.cartoon}"
     if args.reflect:
@@ -75,23 +76,19 @@ for i in range(args.runs):
         cmd += f" --amr {args.amr}"
     if args.amp:
         cmd += f" --amp {args.amp}"
+    if args.sigma:
+        cmd += f" --sigma {args.sigma}"
     if args.layers:
         cmd += f" --layers {args.layers}"
-    if args.gamma1:
-        cmd += f" --gamma1 {args.gamma1}"
-    if args.gamma2:
-        cmd += f" --gamma2 {args.gamma2}"
-    if args.source:
-        cmd += f" --source {args.source}"
     
     # Run the command
     os.system(cmd)
 
     # Renames the parameter file
     if args.convergence_type == 'h':
-        parfilename = f"{results_name}_{args.convergence_type}convergence_nh{nh}"
+        parfilename = f"{results_name}-nh={nh}"
     if args.convergence_type == 'p':
-        parfilename = f"{results_name}_{args.convergence_type}convergence_np{nxyz}"
+        parfilename = f"{results_name}-np={nxyz}"
         
     os.system(f"mv parameters.par {parfilename}.par")
 

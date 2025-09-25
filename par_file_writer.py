@@ -23,6 +23,7 @@ parser.add_argument('--nh', type=int, default=2, help='Number of subdivisions pe
 parser.add_argument('--nxyz', type=int, default=15, help='Number of points in each dimension')
 parser.add_argument('--tmax', type=float, required=True, help='Maximum time for the simulation')
 parser.add_argument('--amp', type=float, default=1.0, help='Amplitude of the initial data (default: 1.0)')
+parser.add_argument('--sigma', type=float, default=1.0, help='Standard deviation of the initial data (default: 1.0)')
 parser.add_argument('--layers', type=bool, default=False, help='Use layers (default: False)')
 parser.add_argument('--gamma1', type=float, default=-1, help='Gamma1 parameter for the project (default: -1)')
 parser.add_argument('--gamma2', type=float, default=2, help='Gamma2 parameter for the project (default: 2)')

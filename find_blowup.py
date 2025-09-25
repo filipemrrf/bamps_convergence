@@ -2,8 +2,8 @@
  " @file find_blowup.py
  " @author Filipe Ficalho (filipe.ficalho@tecnico.ulisboa.pt)
  " @brief macro to find the threshold of blowup using the amplitude solutions for the hyperboloidal wave equation project
- " @version 1.0
- " @date 2025-06-
+ " @version 2.0
+ " @date 2025-08-27
  " 
  " @copyright Copyright (c) 2025
  " 
@@ -14,8 +14,8 @@ import glob
 
 def check_blowup(A: float) -> bool:
     # Checks if the program exited with an error
-    if glob.glob(f"temp_results/hyp_cubic_wave_blowup/hyp_cubic_wave_A{A}/ERROREXIT.*"):
-        return True
+    #if glob.glob(f"temp_results/hyp_cubic_wave_blowup/hyp_cubic_wave_A{A}/ERROREXIT.*"):
+    #    return True
     
     for field in ["psi", "pi", "phix", "phiy", "phiz"]:
         # Opens the output file for the field 
@@ -41,9 +41,9 @@ def check_blowup(A: float) -> bool:
     return False
 
 
-def run_bamps_simulation(base_nxyz: int, tmax: float, gamma1: float, gamma2: float, A: float) -> None:
+def run_bamps_simulation(nxyz: int, scri: float, tmax: float, gamma1: float, gamma2: float, A: float, out_1d: int) -> None:
     # Creates the parameter file
-    os.system(f"python3 par_file_writer.py --nxyz {nxyz} --tmax {tmax} --output blowup --out_1d_every {out_1d_every} --gamma1 {gamma1} --gamma2 {gamma2} --amp {A} --cartoon x --amr True --source cubic > /dev/null 2>&1")
+    os.system(f"python3 par_file_writer.py --nxyz {nxyz} --tmax {tmax} --output blowup --out_1d_every {out_1d} --out_0d_every 1 --gamma1 {gamma1} --gamma2 {gamma2} --amp {A} --cartoon x --source cubic --amr True --scri {scri} > /dev/null 2>&1")
 
     # Renames the par file and moves it to the exe directory
     os.system(f"mv parameters.par hyp_cubic_wave_A{A}.par")
@@ -51,7 +51,7 @@ def run_bamps_simulation(base_nxyz: int, tmax: float, gamma1: float, gamma2: flo
 
     # Move to the bamps directory and run the simulation
     os.chdir("../bamps/exe/")
-    os.system(f"mpirun -np 10 ./bamps hyp_cubic_wave_A{A}.par > A{A}.log 2>&1")
+    os.system(f"mpirun -np 8 ./bamps hyp_cubic_wave_A{A}.par > A{A}.log 2>&1")
 
     # Delete the par_file created from bamps executable directory
     os.system(f"rm hyp_cubic_wave_A{A}.par")
@@ -66,20 +66,21 @@ def run_bamps_simulation(base_nxyz: int, tmax: float, gamma1: float, gamma2: flo
 
 # Define the parameters for the equation
 nxyz = 19
-tmax = 150
+scri = 100
+tmax = 250
 gamma1 = -1.0
 gamma2 = 2.0
 
 # Define parameters for the output
-out_1d_every = 500 
+out_1d_every = 10
 
 # Define the initial range for the test and the tolerance
-stable_A = 2.75
-unstable_A = 2.8
-tol = 1e-15
+stable_A = 1
+unstable_A = 3
+tol = 1e-10
 
 # Blowup criteria
-blowup_criteria = "max"
+blowup_criteria = "origin"
 blowup_threshold = 1e3
 
 # Create a folder to store the results
@@ -97,7 +98,7 @@ while unstable_A - stable_A > tol:
     A = (stable_A + unstable_A) / 2.0
     
     # Run the convergence test with the current amplitude
-    run_bamps_simulation(nxyz, tmax, gamma1, gamma2, A)
+    run_bamps_simulation(nxyz, scri, tmax, gamma1, gamma2, A, 0)
     
     # Check if the solution blows up
     if check_blowup(A):
@@ -114,3 +115,7 @@ with open("temp_results/hyp_cubic_wave_blowup/threshold.txt", "w") as f:
 
 # Print the final result
 print(f"Threshold of blowup found at A = {stable_A} with tolerance {tol}")
+
+# Make a final run with 1d output
+os.system(f"rm -r temp_results/hyp_cubic_wave_blowup/hyp_cubic_wave_A{stable_A}")
+run_bamps_simulation(nxyz, scri, tmax, gamma1, gamma2, stable_A, out_1d_every)
