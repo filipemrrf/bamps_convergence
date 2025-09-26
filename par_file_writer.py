@@ -156,7 +156,7 @@ PAR_FILE.write("\n")
 
 PAR_FILE.write(f"hyp_wave.initialdata                     = gaussianshell\n")
 PAR_FILE.write(f"hyp_wave.initialdata.gaussianshell.amp   = {args.amp}\n")
-PAR_FILE.write(f"hyp_wave.initialdata.gaussianshell.sigma = 1\n")
+PAR_FILE.write(f"hyp_wave.initialdata.gaussianshell.sigma = {args.sigma}\n")
 PAR_FILE.write(f"hyp_wave.initialdata.gaussianshell.r0    = 0\n")
 PAR_FILE.write(f"\n")
 

@@ -38,7 +38,7 @@ Ri = 10.0
 Rt = 20.0
 S = 30.0
 
-file = "temp_results/hyp_layers_cubic_wave_hconvergence-cartoon_x/hyp_layers_cubic_wave_hconvergence-cartoon_x-nh=2/output_1d/x/u.psi"
+file = "temp_results/hyp_layers_cubic_wave_hconvergence-cartoon_x/hyp_layers_cubic_wave_hconvergence-cartoon_x-nh=8/output_1d/x/u.psi"
 data = pymuninn.MuninnData(file)
 grid = data.as_grid()
 
