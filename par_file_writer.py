@@ -31,6 +31,8 @@ parser.add_argument('--source', type=str, default='none', help='Source type (def
 parser.add_argument('--output', type=str, required=True, help='Output fields')
 parser.add_argument('--out_0d_every', type=int, default=10, help='Output frequency (default: 10)')
 parser.add_argument('--out_1d_every', type=int, default=10, help='Output frequency (default: 10)')
+parser.add_argument('--exact', type=bool, default=False, help='Use exact solution (default: False)')
+parser.add_argument('--debug', type=bool, default=False, help='Use debug mode (default: False)')
 
 # Parse the arguments
 args = parser.parse_args()
@@ -154,7 +156,10 @@ PAR_FILE.write("\n")
 PAR_FILE.write("project = hyp_wave\n")
 PAR_FILE.write("\n")
 
-PAR_FILE.write(f"hyp_wave.initialdata                     = gaussianshell\n")
+if args.exact or args.debug:
+    PAR_FILE.write(f"hyp_wave.initialdata                     = debug\n")
+else:
+    PAR_FILE.write(f"hyp_wave.initialdata                     = gaussianshell\n")
 PAR_FILE.write(f"hyp_wave.initialdata.gaussianshell.amp   = {args.amp}\n")
 PAR_FILE.write(f"hyp_wave.initialdata.gaussianshell.sigma = {args.sigma}\n")
 PAR_FILE.write(f"hyp_wave.initialdata.gaussianshell.r0    = 0\n")
@@ -162,7 +167,7 @@ PAR_FILE.write(f"\n")
 
 PAR_FILE.write("hyp_wave.boundary.patch = penalty\n")
 PAR_FILE.write("hyp_wave.boundary.inner = none\n")
-PAR_FILE.write("hyp_wave.boundary.outer = none\n")
+PAR_FILE.write("hyp_wave.boundary.outer = none\n") #bjorhus
 PAR_FILE.write("\n")
 
 if args.layers:
@@ -184,8 +189,15 @@ PAR_FILE.write("# Output parameters                                             
 PAR_FILE.write("###############################################################################\n")
 PAR_FILE.write("\n")
 
+if args.debug:
+    PAR_FILE.write("output.ru = 1\n")
+    PAR_FILE.write("\n")
+
 PAR_FILE.write(f"output.sd.every = {args.out_0d_every}\n")
 PAR_FILE.write("output.sd.mode  = grid0 magicnumber\n")
+PAR_FILE.write("\n")
+
+PAR_FILE.write(f"output.ru = 1\n")
 PAR_FILE.write("\n")
 
 if args.output == "convergence":
@@ -200,7 +212,10 @@ if args.output == "convergence":
         PAR_FILE.write(f"output.1d.dim   = x z\n")
     else:
         PAR_FILE.write(f"output.1d.dim   = x y z\n")
-    PAR_FILE.write(f"output.1d       = u.psi u.pi u.phix u.phiy u.phiz ana.Bx ana.By ana.Bz ana.cpx ana.cmx\n")
+    if args.debug:
+        PAR_FILE.write(f"output.1d       = u.psi u.pi u.phix u.phiy u.phiz ana.E ana.Bx ana.By ana.Bz ana.cpx ana.cmx stat.Omega stat.alpha stat.betax stat.betay stat.betaz stat.gammaxx stat.gammaxy stat.gammaxz stat.gammayy stat.gammayz stat.gammazz stat.Christgammaxxx stat.Christgammaxxy stat.Christgammaxxz stat.Christgammaxyy stat.Christgammaxyz stat.Christgammaxzz stat.Christgammayxx stat.Christgammayxy stat.Christgammayxz stat.Christgammayyy stat.Christgammayyz stat.Christgammayzz stat.Christgammazxx stat.Christgammazxy stat.Christgammazxz stat.Christgammazyy stat.Christgammazyz stat.Christgammazzz stat.accelx stat.accely stat.accelz stat.dbetaxx stat.dbetaxy stat.dbetaxz stat.dbetayx stat.dbetayy stat.dbetayz stat.dbetazx stat.dbetazy stat.dbetazz stat.oomboxom stat.oom2dom2 ru.psi ru.pi ru.phix ru.phiy ru.phiz\n")
+    else:
+        PAR_FILE.write(f"output.1d       = u.psi u.pi u.phix u.phiy u.phiz ana.Bx ana.By ana.Bz\n")
 
 elif args.output == "blowup":
     PAR_FILE.write(f"output.0d.every    = {args.out_0d_every}\n")

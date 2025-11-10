@@ -32,6 +32,8 @@ parser.add_argument('--gamma1', type=float, default=-1, help='Gamma1 parameter f
 parser.add_argument('--gamma2', type=float, default=2, help='Gamma2 parameter for the project (default: 2)')
 parser.add_argument('--source', type=str, default='none', help='Source type (default: none)')
 parser.add_argument('--out_every', type=int, default=10, help='Output frequency (default: 10)')
+parser.add_argument('--exact', type=bool, default=False, help='Use exact solution (default: False)')
+parser.add_argument('--debug', type=bool, default=False, help='Use debug mode (default: False)')
 
 # Parse the arguments
 args = parser.parse_args()
@@ -80,6 +82,10 @@ for i in range(args.runs):
         cmd += f" --sigma {args.sigma}"
     if args.layers:
         cmd += f" --layers {args.layers}"
+    if args.exact:
+        cmd += f" --exact {args.exact}"
+    if args.debug:
+        cmd += f" --debug {args.debug}"
     
     # Run the command
     os.system(cmd)

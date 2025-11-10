@@ -63,7 +63,7 @@ for constraint in ['Bx', 'By', 'Bz']:
     # Collect (n, t, C) for each resolution
     data = []
     for resolution in os.listdir(folder):
-        if resolution.startswith("norm_convergence"):
+        if resolution.startswith("norm_convergence") or resolution.startswith("pointwise_convergence"):
             continue
         if os.path.isdir(f"{folder}/{resolution}"):
             # Extract nxyz as an integer using regex

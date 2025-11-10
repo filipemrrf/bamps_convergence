@@ -2,7 +2,7 @@ import pymuninn
 import matplotlib.pyplot as plt
 import numpy as np
 
-file = "temp_results/hyp_layers_cubic_wave_hconvergence-cartoon_x/hyp_layers_cubic_wave_hconvergence-cartoon_x-nh=8/output_1d/x/u.psi"
+file = "temp_results/hyp_cubic_wave_pconvergence-cartoon_x/hyp_cubic_wave_pconvergence-cartoon_x-np=17/output_1d/x/u.psi"
 data = pymuninn.MuninnData(file)
 grid = data.as_grid()
 
@@ -40,8 +40,8 @@ plt.plot(x_ref, -1 * x_ref, 'r--', label="slope = -1")
 
 plt.xlabel(r"$ln(t)$", fontsize=14)
 plt.ylabel(r"$\psi$", fontsize=14)
-plt.xlim(2, 6)
-plt.ylim(-20.0, 1)
+#plt.xlim(0, 100)
+#plt.ylim(-20.0, 1)
 
 plt.grid(True, which="both", ls="--", lw=0.5)
 plt.legend(fontsize=12)
