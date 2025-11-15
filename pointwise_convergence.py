@@ -1,3 +1,4 @@
+import glob
 import os
 import argparse
 import pymuninn
@@ -47,20 +48,23 @@ if args.exact:
 
                 os.chdir(f"{folder}/pointwise_convergence/")
 
-                if not exact_sol_generated:
-                    # Generates the aux file
-                    AUX = open("aux.csv", 'w')
-                    AUX.write(",".join(f"{t:.16g}" for t in sol_grid.ts) + "\n")
-                    AUX.write(",".join(f"{r:.16g}" for r in sol_grid.xss[0]) + "\n")
-                    AUX.close()
+                if args.generate:
+                    if not exact_sol_generated:
+                        # Generates the aux file
+                        AUX = open("aux.csv", 'w')
+                        AUX.write(",".join(f"{t:.16g}" for t in sol_grid.ts) + "\n")
+                        AUX.write(",".join(f"{r:.16g}" for r in sol_grid.xss[0]) + "\n")
+                        AUX.close()
 
-                    # Generates the exact solution
-                    if not args.debug:
-                        os.system("wolframscript -file ../../../Exact_Solution.wls")
-                    else:
-                        os.system("wolframscript -file ../../../Exact_Solution-Debug.wls")
+                        # Generates the exact solution
+                        if not args.debug:
+                            os.system("wolframscript -file ../../../Exact_Solution.wls")
+                        else:
+                            os.system("wolframscript -file ../../../Exact_Solution-Debug.wls")
 
-                    exact_sol_generated = True
+                        exact_sol_generated = True
+                else:
+                    os.system(f"cp ../../_exact_sol_cache/exact.*.n={n} .")
 
                 # Gets the muninn data from the exact solution
                 exact_data = pymuninn.MuninnData(f"exact.{field}")
@@ -81,7 +85,10 @@ if args.exact:
 
                 OUT.close()
 
-                os.system(f"mv exact.{field} exact.{field}.n={n}.txt")
+                os.system(f"mv exact.{field} exact.{field}.n={n}")
+
+                if args.generate:
+                    os.system(f"cp exact.* ../../_exact_sol_cache/")
 
                 os.chdir("../../../")
 
