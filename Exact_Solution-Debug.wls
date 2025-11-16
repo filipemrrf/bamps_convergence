@@ -94,14 +94,14 @@ alpha = % /. (1 - H[r]^2) -> (Xi[r] Omega[r]^2)/L[r]^2 // Simplify;
 betad = Table[gHypConformalCartdd[[1, i]], {i, 2, 4}];
 Table[Sum[invgammauu[[i, j]] betad[[j]], {j, 1, 3}], {i, 1, 3}] // Simplify;
 betau = % /. cartToR // Simplify;
-Table[D[ReplaceAll[rToCart][betau[[j]]], XHypCart[[i]]], {i, 2, 4}, {j, 1, 3}] // Simplify;
+Table[D[betau[[j]] /. rToCart, XHypCart[[i]]], {i, 2, 4}, {j, 1, 3}] // Simplify;
 % /. cartToR /. Sqrt[x^2 + y^2 + z^2] -> r // Simplify;
 % // Expand;
-dbetau = % /. H[r] L[r] -> r iota[r] // FullSimplify;
+dbetadu = % /. H[r] L[r] -> r iota[r] // FullSimplify;
 
 nd = {-alpha, 0, 0, 0};
 nu = Flatten[{1/alpha, -betau/alpha}] // Simplify;
-Table[Sum[invgammauu[[i, j]] D[ReplaceAll[rToCart][Log[alpha]], XHypCart[[j+1]]], {j, 1, 3}], {i, 1, 3}] // Simplify;
+Table[Sum[invgammauu[[i, j]] D[Log[alpha] /. rToCart, XHypCart[[j+1]]], {j, 1, 3}], {i, 1, 3}] // Simplify;
 accel = % /. rToCart // Simplify;
 
 extrinsicK = Table[(1/(2 alpha) (Sum[gammadd[[j, k]] (D[betau[[k]] \. rToCart, XHypCart[[i+1]]] + Sum[GammaHypConformalCartudd[[k, i, l]] betau[[l]], {l, 1, 3}]), {k, 1, 3}] + 
@@ -198,6 +198,13 @@ outAccelx = OpenWrite["exact.stat.accelx"];
 outAccely = OpenWrite["exact.stat.accely"];
 outAccelz = OpenWrite["exact.stat.accelz"];
 
+outKxx = OpenWrite["exact.stat.Kxx"];
+outKxy = OpenWrite["exact.stat.Kxy"];
+outKxz = OpenWrite["exact.stat.Kxz"];
+outKyy = OpenWrite["exact.stat.Kyy"];
+outKyz = OpenWrite["exact.stat.Kyz"];
+outKzz = OpenWrite["exact.stat.Kzz"];
+
 outDbetaxx = OpenWrite["exact.stat.dbetaxx"];
 outDbetaxy = OpenWrite["exact.stat.dbetaxy"];
 outDbetaxz = OpenWrite["exact.stat.dbetaxz"];
@@ -211,7 +218,7 @@ outDbetazz = OpenWrite["exact.stat.dbetazz"];
 outOomboxom = OpenWrite["exact.stat.oomboxom"];
 outOom2dom2 = OpenWrite["exact.stat.oom2dom2"];
 
-outList = {outPsi, outPi, outPhix, outPhiy, outPhiz, outPsiRHS, outPiRHS, outPhixRHS, outPhiyRHS, outPhizRHS, outOmega, outAlpha, outBetax, outBetay, outBetaz, outGammaxx, outGammaxy, outGammaxz, outGammayy, outGammayz, outGammazz, outChristgammaxxx, outChristgammaxxy, outChristgammaxxz, outChristgammaxyy, outChristgammaxyz, outChristgammaxzz, outChristgammayxx, outChristgammayxy, outChristgammayxz, outChristgammayyy, outChristgammayyz, outChristgammayzz, outChristgammazxx, outChristgammazxy, outChristgammazxz, outChristgammazyy, outChristgammazyz, outChristgammazzz, outAccelx, outAccely, outAccelz, outDbetaxx, outDbetaxy, outDbetaxz, outDbetayx, outDbetayy, outDbetayz, outDbetazx, outDbetazy, outDbetazz, outOomboxom, outOom2dom2}
+outList = {outPsi, outPi, outPhix, outPhiy, outPhiz, outPsiRHS, outPiRHS, outPhixRHS, outPhiyRHS, outPhizRHS, outOmega, outAlpha, outBetax, outBetay, outBetaz, outGammaxx, outGammaxy, outGammaxz, outGammayy, outGammayz, outGammazz, outChristgammaxxx, outChristgammaxxy, outChristgammaxxz, outChristgammaxyy, outChristgammaxyz, outChristgammaxzz, outChristgammayxx, outChristgammayxy, outChristgammayxz, outChristgammayyy, outChristgammayyz, outChristgammayzz, outChristgammazxx, outChristgammazxy, outChristgammazxz, outChristgammazyy, outChristgammazyz, outChristgammazzz, outAccelx, outAccely, outAccelz, outKxx, outKxy, outKxz, outKyy, outKyz, outKzz, outDbetaxx, outDbetaxy, outDbetaxz, outDbetayx, outDbetayy, outDbetayz, outDbetazx, outDbetazy, outDbetazz, outOomboxom, outOom2dom2}
 
 For[i=1, i<=Length[data[[1]]], i++,
     t = data[[1]][[i]];
@@ -247,9 +254,50 @@ For[i=1, i<=Length[data[[1]]], i++,
         WriteField[outGammayz, r, gammadd[[2,3]] /. HypDef /. cartoon];
         WriteField[outGammazz, r, gammadd[[3,3]] /. HypDef /. cartoon];
 
+        WriteField[outChristgammaxxx, r, GammaHypConformalCartudd[[2,2,2]] /. HypDef /. cartoon];
+        WriteField[outChristgammaxxy, r, GammaHypConformalCartudd[[2,2,3]] /. HypDef /. cartoon];
+        WriteField[outChristgammaxxz, r, GammaHypConformalCartudd[[2,2,4]] /. HypDef /. cartoon];
+        WriteField[outChristgammaxyy, r, GammaHypConformalCartudd[[2,3,3]] /. HypDef /. cartoon];
+        WriteField[outChristgammaxyz, r, GammaHypConformalCartudd[[2,3,4]] /. HypDef /. cartoon];
+        WriteField[outChristgammaxzz, r, GammaHypConformalCartudd[[2,4,4]] /. HypDef /. cartoon];
+
+        WriteField[outChristgammayxx, r, GammaHypConformalCartudd[[3,2,2]] /. HypDef /. cartoon];
+        WriteField[outChristgammayxy, r, GammaHypConformalCartudd[[3,2,3]] /. HypDef /. cartoon];
+        WriteField[outChristgammayxz, r, GammaHypConformalCartudd[[3,2,4]] /. HypDef /. cartoon];
+        WriteField[outChristgammayyy, r, GammaHypConformalCartudd[[3,3,3]] /. HypDef /. cartoon];
+        WriteField[outChristgammayyz, r, GammaHypConformalCartudd[[3,3,4]] /. HypDef /. cartoon];
+        WriteField[outChristgammayzz, r, GammaHypConformalCartudd[[3,4,4]] /. HypDef /. cartoon];
+
+        WriteField[outChristgammazxx, r, GammaHypConformalCartudd[[4,2,2]] /. HypDef /. cartoon];
+        WriteField[outChristgammazxy, r, GammaHypConformalCartudd[[4,2,3]] /. HypDef /. cartoon];
+        WriteField[outChristgammazxz, r, GammaHypConformalCartudd[[4,2,4]] /. HypDef /. cartoon];
+        WriteField[outChristgammazyy, r, GammaHypConformalCartudd[[4,3,3]] /. HypDef /. cartoon];
+        WriteField[outChristgammazyz, r, GammaHypConformalCartudd[[4,3,4]] /. HypDef /. cartoon];
+        WriteField[outChristgammazzz, r, GammaHypConformalCartudd[[4 ,4,4]] /. HypDef /. cartoon];
+
         WriteField[outAccelx, r, accelu[[1]] /. HypDef /. cartoon];
         WriteField[outAccely, r, accelu[[2]] /. HypDef /. cartoon];
         WriteField[outAccelz, r, accelu[[3]] /. HypDef /. cartoon];
+
+        WriteField[outKxx, r, extrinsicK[[1,1]] /. HypDef /. cartoon];
+        WriteField[outKxy, r, extrinsicK[[1,2]] /. HypDef /. cartoon];
+        WriteField[outKxz, r, extrinsicK[[1,3]] /. HypDef /. cartoon];
+        WriteField[outKyy, r, extrinsicK[[2,2]] /. HypDef /. cartoon];
+        WriteField[outKyz, r, extrinsicK[[2,3]] /. HypDef /. cartoon];
+        WriteField[outKzz, r, extrinsicK[[3,3]] /. HypDef /. cartoon];
+
+        WriteField[outDbetaxx, r, dbetadu[[1,1]] /. HypDef /. cartoon];
+        WriteField[outDbetaxy, r, dbetadu[[1,2]] /. HypDef /. cartoon];
+        WriteField[outDbetaxz, r, dbetadu[[1,3]] /. HypDef /. cartoon];
+        WriteField[outDbetayx, r, dbetadu[[2,1]] /. HypDef /. cartoon];
+        WriteField[outDbetayy, r, dbetadu[[2,2]] /. HypDef /. cartoon];
+        WriteField[outDbetayz, r, dbetadu[[2,3]] /. HypDef /. cartoon];
+        WriteField[outDbetazx, r, dbetadu[[3,1]] /. HypDef /. cartoon];
+        WriteField[outDbetazy, r, dbetadu[[3,2]] /. HypDef /. cartoon];
+        WriteField[outDbetazz, r, dbetadu[[3,3]] /. HypDef /. cartoon];
+
+        WriteField[outOomboxom, r, oomboxom];
+        WriteField[outOom2dom2, r, oomboxom];
     ];
 
     WriteNewLine[outList];
