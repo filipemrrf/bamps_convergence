@@ -35,13 +35,13 @@ gMindd = {{-1, 0, 0, 0},
 (* Defines the Jacobian that changes coordinates from cartesian to spherical and vice versa *)
 XCart = {T, X, Y, Z};
 XSpher = {T, R, theta, phi} /. theta -> ArcCos[Z/R] /. R -> Sqrt[X^2 + Y^2 + Z^2] /. phi -> Sign[Y] ArcCos[X/Sqrt[X^2 + Y^2]];
-Table[D[XSpher[[nu]], XCart[[mu]]], {mu, 1, 4}, {nu, 1, 4}] /. Derivative[1][Sign][Y] -> 0;
-jCartdu = Assuming[{Element[X, Reals] && Element[Y, Reals] && Element[Z, Reals]}, % // FullSimplify];
+temp = Table[D[XSpher[[nu]], XCart[[mu]]], {mu, 1, 4}, {nu, 1, 4}] /. Derivative[1][Sign][Y] -> 0;
+jCartdu = Assuming[{Element[X, Reals] && Element[Y, Reals] && Element[Z, Reals]}, temp // FullSimplify];
 jSpherdu = Inverse[jCartdu] // Simplify;
 
 (* Changes the coordinates of the Minkowski metric to spherical *)
-Table[Sum[jSpherdu[[mu, a]] jSpherdu[[nu, b]] gMindd[[a, b]], {a, 1, 4}, {b, 1, 4}], {mu, 1, 4}, {nu, 1, 4}] // Simplify;
-gMinSphericaldd = % /. X^2 + Y^2 + Z^2 -> R^2 /. X^2 + Y^2 -> R^2 Sin[theta]^2 // Simplify;
+temp = Table[Sum[jSpherdu[[mu, a]] * jSpherdu[[nu, b]] * gMindd[[a, b]], {a, 1, 4}, {b, 1, 4}], {mu, 1, 4}, {nu, 1, 4}] // Simplify;
+gMinSphericaldd = temp /. X^2 + Y^2 + Z^2 -> R^2 /. X^2 + Y^2 -> R^2 Sin[theta]^2 // Simplify;
 
 (* Defines the functions needed in the hyp transformations *)
 HypDef = {Omega -> Function[r, 1 - r^2/S^2], H -> Function[r, (4 r^7 S^2 - r^5 (8 + r^2) S^4 + r^3 (4 + 3 r^2) S^6)/((r^2 + S^2) (r^4 + S^4 + r^2 S^2 (-2 + S^2))^(3/2))], L -> Function[r, 1 + r^2/S^2], Xi -> Function[r, (r^12 - 2 r^10 S^2 - r^8 (1 + 13 r^2) S^4 + 4 r^6 (1 + 8 r^2 + 2 r^4) S^6 - r^4 (1 + 22 r^2 + 21 r^4 + r^6) S^8 + 2 r^2 (-1 + 3 r^4 + 2 r^6) S^10 + (1 + r^2)^3 S^12)/(r^4 + S^4 + r^2 S^2 (-2 + S^2))^3], Upsilon -> Function[r, -((4 r)/S^2)], iota -> Function[r, (4 r^6 - r^4 (8 + r^2) S^2 + r^2 (4 + 3 r^2) S^4)/(r^4 + S^4 + r^2 S^2 (-2 + S^2))^(3/2)]};
@@ -51,76 +51,84 @@ HypHOmegaLReturn = {Xi[r] -> ((1 - H[r]^2) L[r]^2)/Omega[r]^2, Upsilon[r] -> (Om
 XSpher = {T, R, theta, phi} /.T -> t + h[R] /. R -> r/Omega[r];
 XHypSpher = {t, r, theta, phi};
 $Assumptions = Element[r, Reals] && r >= 0 && r <= S;
-Table[D[XSpher[[nu]], XHypSpher[[mu]]], {mu, 1, 4}, {nu, 1, 4}];
-jHypdu = % /.Derivative[1][h][r/Omega[r]] -> H[r] /. Derivative[1][Omega][r] -> (Omega[r] - L[r])/r // Simplify;
+temp = Table[D[XSpher[[nu]], XHypSpher[[mu]]], {mu, 1, 4}, {nu, 1, 4}];
+jHypdu = temp /.Derivative[1][h][r/Omega[r]] -> H[r] /. Derivative[1][Omega][r] -> (Omega[r] - L[r])/r // Simplify;
 
 (* Changes the coordinates of the metric to hyperboloidal *)
-Table[Sum[jHypdu[[mu, a]] jHypdu[[nu, b]] gMinSphericaldd[[a, b]], {a, 1, 4}, {b, 1, 4}], {mu, 1, 4}, {nu, 1, 4}];
-gHypdd = % /.R -> r/Omega[r] // Simplify;
+temp = Table[Sum[jHypdu[[mu, a]] jHypdu[[nu, b]] gMinSphericaldd[[a, b]], {a, 1, 4}, {b, 1, 4}], {mu, 1, 4}, {nu, 1, 4}];
+gHypdd = temp /.R -> r/Omega[r] // Simplify;
 
 (* Conformally rescales the metric *)
 gHypConformaldd = Omega[r]^2 gHypdd;
 
 (* Changes coordinates to Cartesian Hyperboloidal *)
-Table[Sum[jCartdu[[mu, a]] jCartdu[[nu, b]] gHypConformaldd[[a, b]], {a, 1, 4}, {b, 1, 4}], {mu, 1, 4}, {nu, 1, 4}] /.{X -> x, Y -> y, Z -> z};
-% /. Sin[theta]^2 -> (x^2 + y^2)/r^2 /.rToCart // Simplify;
-% /. cartToR // Simplify;
-gHypConformalCartdd = % /. (-1 + H[r]^2) -> (-Xi[r] Omega[r]^2)/L[r]^2 // Simplify;
+temp = Table[Sum[jCartdu[[mu, a]] jCartdu[[nu, b]] gHypConformaldd[[a, b]], {a, 1, 4}, {b, 1, 4}], {mu, 1, 4}, {nu, 1, 4}] /.{X -> x, Y -> y, Z -> z};
+temp2 = temp /. Sin[theta]^2 -> (x^2 + y^2)/r^2 /.rToCart // Simplify;
+temp = temp2 /. cartToR // Simplify;
+gHypConformalCartdd = temp /. (-1 + H[r]^2) -> (-Xi[r] Omega[r]^2)/L[r]^2 // Simplify;
 
-Inverse[gHypConformalCartdd] // Simplify;
-invgHypConformalCartuu = % /. cartToR // Simplify;
+temp = Inverse[gHypConformalCartdd] // Simplify;
+invgHypConformalCartuu = temp /. cartToR // Simplify;
 
 (* Calculates the Christoffel symbols *)
 XHypCart = {t, x, y, z};
-Table[1/2 Sum[ReplaceRepeated[Flatten[{HypHOmegaLReturn, rToCart}]][invgHypConformalCartuu][[a, d]] 
-    (D[ReplaceRepeated[Flatten[{HypHOmegaLReturn, rToCart}]][invgHypConformalCartuu][[c, d]], XHypCart[[b]]] +
-     D[ReplaceRepeated[Flatten[{HypHOmegaLReturn, rToCart}]][invgHypConformalCartuu][[b, d]], XHypCart[[c]]] -
-     D[ReplaceRepeated[Flatten[{HypHOmegaLReturn, rToCart}]][invgHypConformalCartuu][[b, c]], XHypCart[[d]]]), {d, 1, 4}]
+temp = Table[1/2 Sum[(invgHypConformalCartuu[[a, d]] /. HypHOmegaLReturn /. rToCart)
+    (D[(gHypConformalCartdd[[c, d]] /. HypHOmegaLReturn /. rToCart), XHypCart[[b]]] +
+     D[(gHypConformalCartdd[[b, d]] /. HypHOmegaLReturn /. rToCart), XHypCart[[c]]] -
+     D[(gHypConformalCartdd[[b, c]]/. HypHOmegaLReturn /. rToCart), XHypCart[[d]]]), {d, 1, 4}],
     {a, 1, 4}, {b, 1, 4}, {c, 1, 4}] // Simplify;
-% /. cartToR // Simplify;
-% /. (-1 + H[r]^2) -> (-\[CapitalXi][r] \[CapitalOmega][r]^2)/L[r]^2;
-% // Expand;
-GammaHypConformalCartudd = % /. Omega[r]^2 -> r Upsilon[r] + L[r]^2 // Simplify;
+temp2 = temp /. cartToR // Simplify;
+temp = temp2 /. (-1 + H[r]^2) -> (-Xi[r] Omega[r]^2)/L[r]^2;
+temp2 = temp // Expand;
+GHypConformalCartudd = temp2 /. Omega[r]^2 -> r Upsilon[r] + L[r]^2 // Simplify;
 
 (* Calculates the 3+1 quantities *)
+XSpatialHypCart = {x, y, z};
 gammadd = Table[gHypConformalCartdd[[i, j]], {i, 2, 4}, {j, 2, 4}];
-Inverse[gammadd] // Simplify;
-invgammauu = % /. cartToR // Simplify;
+temp = Inverse[gammadd] // Simplify;
+invgammauu = temp /. cartToR // Simplify;
 
-1/Sqrt[-invgHypConformalCartuu[[1, 1]]] // Simplify;
-% /. HypHOmegaLReturn // Simplify;
-alpha = % /. (1 - H[r]^2) -> (Xi[r] Omega[r]^2)/L[r]^2 // Simplify;
+temp = Table[1/2 Sum[(invgammauu[[a, d]] /. HypHOmegaLReturn /. rToCart) 
+    (D[(gammadd[[c, d]] /. HypHOmegaLReturn /. rToCart), XSpatialHypCart[[b]]] +
+     D[(gammadd[[b, d]] /. HypHOmegaLReturn /. rToCart), XSpatialHypCart[[c]]] -
+     D[(gammadd[[b, c]]/. HypHOmegaLReturn /. rToCart), XSpatialHypCart[[d]]]), {d, 1, 3}],
+    {a, 1, 3}, {b, 1, 3}, {c, 1, 3}] // Simplify;
+temp2 = temp /. cartToR // Simplify;
+GammaHypConformalCartudd = temp2 /. (-1 + H[r]^2) -> (-Xi[r] Omega[r]^2)/L[r]^2 //Simplify;
+
+temp = 1/Sqrt[-invgHypConformalCartuu[[1, 1]]] // Simplify;
+temp2 = temp /. HypHOmegaLReturn // Simplify;
+alpha = temp2 /. (1 - H[r]^2) -> (Xi[r] Omega[r]^2)/L[r]^2 // Simplify;
 
 betad = Table[gHypConformalCartdd[[1, i]], {i, 2, 4}];
-Table[Sum[invgammauu[[i, j]] betad[[j]], {j, 1, 3}], {i, 1, 3}] // Simplify;
-betau = % /. cartToR // Simplify;
-Table[D[betau[[j]] /. rToCart, XHypCart[[i]]], {i, 2, 4}, {j, 1, 3}] // Simplify;
-% /. cartToR /. Sqrt[x^2 + y^2 + z^2] -> r // Simplify;
-% // Expand;
-dbetadu = % /. H[r] L[r] -> r iota[r] // FullSimplify;
+temp = Table[Sum[invgammauu[[i, j]] betad[[j]], {j, 1, 3}], {i, 1, 3}] // Simplify;
+betau = temp /. cartToR // Simplify;
+temp = Table[D[betau[[j]] /. rToCart, XSpatialHypCart[[i]]], {i, 1, 3}, {j, 1, 3}] // Simplify;
+temp2 = temp /. cartToR /. Sqrt[x^2 + y^2 + z^2] -> r // Simplify;
+temp = temp2 // Expand;
+dbetadu = temp /. H[r] L[r] -> r iota[r] // FullSimplify;
 
 nd = {-alpha, 0, 0, 0};
 nu = Flatten[{1/alpha, -betau/alpha}] // Simplify;
-Table[Sum[invgammauu[[i, j]] D[Log[alpha] /. rToCart, XHypCart[[j+1]]], {j, 1, 3}], {i, 1, 3}] // Simplify;
-accel = % /. rToCart // Simplify;
+temp = Table[Sum[invgammauu[[i, j]] D[Log[alpha] /. rToCart, XSpatialHypCart[[j]]], {j, 1, 3}], {i, 1, 3}] // Simplify;
+accelu = temp /. rToCart // Simplify;
 
-extrinsicK = Table[(1/(2 alpha) (Sum[gammadd[[j, k]] (D[betau[[k]] \. rToCart, XHypCart[[i+1]]] + Sum[GammaHypConformalCartudd[[k, i, l]] betau[[l]], {l, 1, 3}]), {k, 1, 3}] + 
-        Sum[gammadd[[i, k]] (D[betau[[k]] \. rToCart, XHypCart[[j+1]]] + Sum[GammaHypConformalCartudd[[k, j, l]] betau[[l]], {l, 1, 3}]), {k, 1, 3}])), {i, 1, 3}, {j, 1, 3}] // Simplify;
+extrinsicK = Table[(1/(2 alpha) * (Sum[gammadd[[j, k]] (D[betau[[k]] /. rToCart, XHypCart[[i+1]]] + Sum[GammaHypConformalCartudd[[k, i, l]] betau[[l]], {l, 1, 3}]), {k, 1, 3}] + Sum[gammadd[[i, k]] (D[betau[[k]] /. rToCart, XSpatialHypCart[[j]]] + Sum[GammaHypConformalCartudd[[k, j, l]] betau[[l]], {l, 1, 3}]), {k, 1, 3}])), {i, 1, 3}, {j, 1, 3}] //. HypDef;
 
-1/Omega[Sqrt[x^2 + y^2 + z^2]] (Sum[invgHypConformalCartuu[[a, b]] (D[Omega[Sqrt[x^2 + y^2 + z^2]], XHypCart[[a]], XHypCart[[b]]] - 
-    Sum[GammaHypConformalCartudd[[c, a, b]] D[Omega[Sqrt[x^2 + y^2 + z^2]], XHypCart[[c]]], {c, 1, 4}]), {a, 1, 4}, {b, 1, 4}]) /. Omega -> Function[r, 1 - r^2/S^2];
-Assuming[S > 0 && Ri >= 0 && r >= 0 && r >= Ri && r <= S, % // Simplify];
-Assuming[S > 0 && Ri >= 0 && r >= 0 && r >= Ri && r <= S, % /. cartToR // Simplify];
-Assuming[S > 0 && Ri >= 0 && r >= 0 && r >= Ri && r <= S, % // Together];
-Assuming[S > 0 && Ri >= 0 && r >= 0 && r >= Ri && r <= S, % // Simplify];
-Assuming[S > 0 && Ri >= 0 && r >= 0 && r >= Ri && r <= S, % /. cartToR // Simplify];
-Assuming[S > 0 && Ri >= 0 && r >= 0 && r >= Ri && r <= S, oomboxom = % /. HypDef // Simplify];
+temp = 1/Omega[Sqrt[x^2 + y^2 + z^2]] (Sum[invgHypConformalCartuu[[a, b]] (D[Omega[Sqrt[x^2 + y^2 + z^2]], XHypCart[[a]], XHypCart[[b]]] - 
+    Sum[GHypConformalCartudd[[c, a, b]] D[Omega[Sqrt[x^2 + y^2 + z^2]], XHypCart[[c]]], {c, 1, 4}]), {a, 1, 4}, {b, 1, 4}]) /. Omega -> Function[r, 1 - r^2/S^2];
+Assuming[S > 0 && r <= S, temp2 = temp // Simplify];
+Assuming[S > 0 && r <= S, temp = temp2 /. cartToR // Simplify];
+Assuming[S > 0 && r <= S, temp2 = temp // Together];
+Assuming[S > 0 && r <= S, temp = temp2 // Simplify];
+Assuming[S > 0 && r <= S, temp2 = temp /. cartToR // Simplify];
+Assuming[S > 0 && r <= S, oomboxom = temp2 /. HypDef // Simplify];
 
-1/Omega[Sqrt[x^2 + y^2 + z^2]]^2 (Sum[invgHypConformalCartuu[[a, b]] D[Omega[Sqrt[x^2 + y^2 + z^2]], XHypCart[[a]]] D[Omega[Sqrt[x^2 + y^2 + z^2]], XHypCart[[b]]], {a, 1, 4}, {b, 1, 4}]) /. \[CapitalOmega] -> Function[r, 1 - r^2/S^2];
-Assuming[S > 0 && Ri >= 0 && r >= 0 && r >= Ri, % // Simplify];
-Assuming[S > 0 && Ri >= 0 && r >= 0 && r >= Ri, % /. (x^2 + y^2 + z^2) -> r^2 // Simplify];
-Assuming[S > 0 && Ri >= 0 && r >= 0 && r >= Ri, % /. HypDef // Simplify];
-Assuming[S > 0 && Ri >= 0 && r >= 0 && r >= Ri, oom2dom2 = % /. (x^2 + y^2 + z^2) -> r^2 // Simplify];
+temp = (1/(Omega[Sqrt[x^2 + y^2 + z^2]]^2) Sum[invgHypConformalCartuu[[a, b]] D[(Omega[Sqrt[x^2 + y^2 + z^2]] /. HypDef), XHypCart[[a]]] D[(Omega[Sqrt[x^2 + y^2 + z^2]] /. HypDef), XHypCart[[b]]], {a, 1, 4}, {b, 1, 4}]) /. Omega -> Function[r, 1 - r^2/S^2];
+Assuming[S > 0 && r <= S, temp2 = temp // Simplify];
+Assuming[S > 0 && r <= S, temp = temp2 /. cartToR // Simplify];
+Assuming[S > 0 && r <= S, temp2 = temp /. HypDef // Simplify];
+Assuming[S > 0 && r <= S, oom2dom2 = temp2 /. cartToR // Simplify];
 
 (* Defines the exact solution *)
 S = 30;
@@ -235,12 +243,6 @@ For[i=1, i<=Length[data[[1]]], i++,
         WriteField[outPhiy, r, phi[[2]] /. cartoon];
         WriteField[outPhiz, r, phi[[3]] /. cartoon];
 
-        WriteField[outPsiRHS, r, psiRHS];
-        WriteField[outPiRHS, r, piRHS /. cartoon];
-        WriteField[outPhixRHS, r, phiRHS[[1]] /. cartoon];
-        WriteField[outPhiyRHS, r, phiRHS[[2]] /. cartoon];
-        WriteField[outPhizRHS, r, phiRHS[[3]] /. cartoon];
-
         WriteField[outOmega, r, Omega[r] /. HypDef];
         WriteField[outAlpha, r, alpha /. HypDef];
         WriteField[outBetax, r, betau[[1]] /. HypDef /. cartoon];
@@ -254,26 +256,26 @@ For[i=1, i<=Length[data[[1]]], i++,
         WriteField[outGammayz, r, gammadd[[2,3]] /. HypDef /. cartoon];
         WriteField[outGammazz, r, gammadd[[3,3]] /. HypDef /. cartoon];
 
-        WriteField[outChristgammaxxx, r, GammaHypConformalCartudd[[2,2,2]] /. HypDef /. cartoon];
-        WriteField[outChristgammaxxy, r, GammaHypConformalCartudd[[2,2,3]] /. HypDef /. cartoon];
-        WriteField[outChristgammaxxz, r, GammaHypConformalCartudd[[2,2,4]] /. HypDef /. cartoon];
-        WriteField[outChristgammaxyy, r, GammaHypConformalCartudd[[2,3,3]] /. HypDef /. cartoon];
-        WriteField[outChristgammaxyz, r, GammaHypConformalCartudd[[2,3,4]] /. HypDef /. cartoon];
-        WriteField[outChristgammaxzz, r, GammaHypConformalCartudd[[2,4,4]] /. HypDef /. cartoon];
+        WriteField[outChristgammaxxx, r, GammaHypConformalCartudd[[1,1,1]] /. HypDef /. cartoon];
+        WriteField[outChristgammaxxy, r, GammaHypConformalCartudd[[1,1,2]] /. HypDef /. cartoon];
+        WriteField[outChristgammaxxz, r, GammaHypConformalCartudd[[1,1,3]] /. HypDef /. cartoon];
+        WriteField[outChristgammaxyy, r, GammaHypConformalCartudd[[1,2,2]] /. HypDef /. cartoon];
+        WriteField[outChristgammaxyz, r, GammaHypConformalCartudd[[1,2,3]] /. HypDef /. cartoon];
+        WriteField[outChristgammaxzz, r, GammaHypConformalCartudd[[1,3,3]] /. HypDef /. cartoon];
 
-        WriteField[outChristgammayxx, r, GammaHypConformalCartudd[[3,2,2]] /. HypDef /. cartoon];
-        WriteField[outChristgammayxy, r, GammaHypConformalCartudd[[3,2,3]] /. HypDef /. cartoon];
-        WriteField[outChristgammayxz, r, GammaHypConformalCartudd[[3,2,4]] /. HypDef /. cartoon];
-        WriteField[outChristgammayyy, r, GammaHypConformalCartudd[[3,3,3]] /. HypDef /. cartoon];
-        WriteField[outChristgammayyz, r, GammaHypConformalCartudd[[3,3,4]] /. HypDef /. cartoon];
-        WriteField[outChristgammayzz, r, GammaHypConformalCartudd[[3,4,4]] /. HypDef /. cartoon];
+        WriteField[outChristgammayxx, r, GammaHypConformalCartudd[[2,1,1]] /. HypDef /. cartoon];
+        WriteField[outChristgammayxy, r, GammaHypConformalCartudd[[2,1,2]] /. HypDef /. cartoon];
+        WriteField[outChristgammayxz, r, GammaHypConformalCartudd[[2,1,3]] /. HypDef /. cartoon];
+        WriteField[outChristgammayyy, r, GammaHypConformalCartudd[[2,2,2]] /. HypDef /. cartoon];
+        WriteField[outChristgammayyz, r, GammaHypConformalCartudd[[2,2,3]] /. HypDef /. cartoon];
+        WriteField[outChristgammayzz, r, GammaHypConformalCartudd[[2,3,3]] /. HypDef /. cartoon];
 
-        WriteField[outChristgammazxx, r, GammaHypConformalCartudd[[4,2,2]] /. HypDef /. cartoon];
-        WriteField[outChristgammazxy, r, GammaHypConformalCartudd[[4,2,3]] /. HypDef /. cartoon];
-        WriteField[outChristgammazxz, r, GammaHypConformalCartudd[[4,2,4]] /. HypDef /. cartoon];
-        WriteField[outChristgammazyy, r, GammaHypConformalCartudd[[4,3,3]] /. HypDef /. cartoon];
-        WriteField[outChristgammazyz, r, GammaHypConformalCartudd[[4,3,4]] /. HypDef /. cartoon];
-        WriteField[outChristgammazzz, r, GammaHypConformalCartudd[[4 ,4,4]] /. HypDef /. cartoon];
+        WriteField[outChristgammazxx, r, GammaHypConformalCartudd[[3,1,1]] /. HypDef /. cartoon];
+        WriteField[outChristgammazxy, r, GammaHypConformalCartudd[[3,1,2]] /. HypDef /. cartoon];
+        WriteField[outChristgammazxz, r, GammaHypConformalCartudd[[3,1,3]] /. HypDef /. cartoon];
+        WriteField[outChristgammazyy, r, GammaHypConformalCartudd[[3,2,2]] /. HypDef /. cartoon];
+        WriteField[outChristgammazyz, r, GammaHypConformalCartudd[[3,2,3]] /. HypDef /. cartoon];
+        WriteField[outChristgammazzz, r, GammaHypConformalCartudd[[3,3,3]] /. HypDef /. cartoon];
 
         WriteField[outAccelx, r, accelu[[1]] /. HypDef /. cartoon];
         WriteField[outAccely, r, accelu[[2]] /. HypDef /. cartoon];
@@ -296,8 +298,25 @@ For[i=1, i<=Length[data[[1]]], i++,
         WriteField[outDbetazy, r, dbetadu[[3,2]] /. HypDef /. cartoon];
         WriteField[outDbetazz, r, dbetadu[[3,3]] /. HypDef /. cartoon];
 
-        WriteField[outOomboxom, r, oomboxom];
-        WriteField[outOom2dom2, r, oomboxom];
+        WriteField[outOomboxom, r, oomboxom /. HypDef /. cartoon];
+        WriteField[outOom2dom2, r, oom2dom2 /. HypDef /. cartoon];
+
+        temp = t;
+        If[i==1, 
+            WriteField[outPsiRHS, r, 0];
+            WriteField[outPiRHS, r, 0];
+            WriteField[outPhixRHS, r, 0];
+            WriteField[outPhiyRHS, r, 0];
+            WriteField[outPhizRHS, r, 0];
+            , 
+            t = tPrev;
+            WriteField[outPsiRHS, r, psiRHS];
+            WriteField[outPiRHS, r, piRHS /. cartoon];
+            WriteField[outPhixRHS, r, phiRHS[[1]] /. cartoon];
+            WriteField[outPhiyRHS, r, phiRHS[[2]] /. cartoon];
+            WriteField[outPhizRHS, r, phiRHS[[3]] /. cartoon];
+        ];
+        tPrev = temp;
     ];
 
     WriteNewLine[outList];

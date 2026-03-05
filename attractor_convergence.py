@@ -9,7 +9,7 @@ def Omega(r):
     elif r >= Rt:
         return 1.0 - ((r - Ri)/(S - Ri))**2
     else:
-        return 1.0 + ((r - Ri)**5 * (6.0 * r**2 + 3.0 * r * Ri + Ri**2 - 5.0 * (3.0 * r + Ri) * Rt + 10.0 * Rt**2))/((Ri - Rt)**5 * (Ri - S)**2)
+        return 1.0 - ((r - Ri)**6 * (20.0 * r**3 + 10.0 * r**2 * Ri + 4.0 * r * Ri**2 + Ri**3 - 7.0 * (10.0 * r**2 + 4.0 * r * Ri + Ri**2) * Rt + 21.0 * (4.0 * r + Ri) * Rt**2 - 35.0 * Rt**3))/((Ri - Rt)**7 * (Ri - S)**2)
 
 def tau(t, r):
     if r == 0:
@@ -33,7 +33,7 @@ Ri = 10.0
 Rt = 20.0
 S = 30.0
 
-file = "temp_results/hyp_layers_cubic_wave_hconvergence-cartoon_x/hyp_layers_cubic_wave_hconvergence-cartoon_x-nh=8/output_1d/x/u.psi"
+file = "results/hyp_layers_cubic_wave-amp=1-cartoon_x-long-lowtres/output_1d/x/u.psi"
 data = pymuninn.MuninnData(file)
 
 time_a_list = []
@@ -48,7 +48,7 @@ for i in range(int(len(data.points)/len(data.times))):
     psi = []
 
     for j in range(len(data.points)):
-        if data.points[j][0] < 100.0:
+        if data.points[j][0] < 300.0:
             continue
         if data.points[j][1] == r_fixed:
             time.append(data.points[j][0])
@@ -72,7 +72,7 @@ time_a = np.mean(time_a_list)
 time_b = np.mean(time_b_list)
 
 print(f"Fitted parameters in time: a = {time_a}, b = {time_b}, std(a) = {np.std(time_a_list)}, std(b) = {np.std(time_b_list)}")
-#Fitted parameters in time: a = -68.05005362613613, b = 4202.82185933907, std(a) = 2.1004940664810934, std(b) = 1527.7899821095182
+#Fitted parameters in time: a = -0.741540794217457, b = 120.21046964910734, std(a) = 1.395168886565597, std(b) = 51.4026575116235
 
 # Calculates the L2 norm of the difference between the numerical and the attractor solution
 FIT_FILE = open(f"temp_results/psi({time_a},{time_b}).data", 'w')

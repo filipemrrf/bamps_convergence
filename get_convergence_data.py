@@ -24,6 +24,7 @@ parser.add_argument('--cartoon', type=str, help='Cartoon axis (default: none)')
 parser.add_argument('--reflect', type=str, help='Reflect axis (default: none)')
 parser.add_argument('--amr', type=bool, default=False, help='AMR (default: False)')
 parser.add_argument('--base_nxyz', type=int, default=15, help='Number of points in each dimension')
+parser.add_argument('--nh', type=int, default=2, help='Number of subdivisions per patch')
 parser.add_argument('--tmax', type=float, required=True, help='Maximum time for the simulation')
 parser.add_argument('--amp', type=float, default=1.0, help='Amplitude of the initial data (default: 1.0)')
 parser.add_argument('--sigma', type=float, default=1.0, help='Standard deviation of the initial data (default: 1.0)')
@@ -63,13 +64,13 @@ if os.path.exists(f"temp_results/{results_name}/"):
 os.makedirs(f"temp_results/{results_name}/", exist_ok=True)
 
 # Initial number of subdivisions per patch and number of points in each subdivision
-nh = 2
+nh = args.nh
 nxyz = args.base_nxyz
 
 # Loop over the number of runs
 for i in range(args.runs):    
     # Create the command to run the par_file_writer.py script
-    cmd = f"python3 par_file_writer.py --nh {nh} --nxyz {nxyz} --tmax {args.tmax} --output convergence --out_0d_every {args.out_every} --out_1d_every {args.out_every} --scri {args.scri} --gamma1 {args.gamma1} --gamma2 {args.gamma2} --source {args.source}"
+    cmd = f"python3 par_file_writer.py --nh {nh} --nxyz {nxyz} --tmax {args.tmax} --output blowup --out_0d_every {args.out_every} --out_1d_every {args.out_every} --scri {args.scri} --gamma1 {args.gamma1} --gamma2 {args.gamma2} --source {args.source}"
     if args.cartoon:
         cmd += f" --cartoon {args.cartoon}"
     if args.reflect:

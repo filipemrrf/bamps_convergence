@@ -11,7 +11,7 @@ r0 = 0;
 sigma = 1;
 f[r_] = r * A * Exp[-((r - r0)/sigma)^2]
 exact[T_, R_] := (f[T + R] - f[T - R])/R;
-Psi[t_, r_] := exact[t + (2 * (r/Omega[r])^2 + S^2 - Sqrt[4 * (r/Omega[r])^2 * S^2 + S^4])/(2 * Sqrt[(r/Omega[r])^2 + 1]), r/Omega[r]];
+Psi[t_, r_] := exact[t + (2 * (r/Omega[r])^2 + S^2 - Sqrt[4 * (r/Omega[r])^2 * S^2 + S^4])/(2 * (r/Omega[r])), r/Omega[r]];
 psi = Psi[t, r]/Omega[r];
 
 (* Reads what output is needed *)
