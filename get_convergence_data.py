@@ -70,7 +70,7 @@ nxyz = args.base_nxyz
 # Loop over the number of runs
 for i in range(args.runs):    
     # Create the command to run the par_file_writer.py script
-    cmd = f"python3 par_file_writer.py --nh {nh} --nxyz {nxyz} --tmax {args.tmax} --output blowup --out_0d_every {args.out_every} --out_1d_every {args.out_every} --scri {args.scri} --gamma1 {args.gamma1} --gamma2 {args.gamma2} --source {args.source}"
+    cmd = f"python3 par_file_writer.py --nh {nh} --nxyz {nxyz} --tmax {args.tmax} --output convergence --out_0d_every {args.out_every} --out_1d_every {args.out_every} --scri {args.scri} --gamma1 {args.gamma1} --gamma2 {args.gamma2} --source {args.source}"
     if args.cartoon:
         cmd += f" --cartoon {args.cartoon}"
     if args.reflect:

@@ -87,8 +87,9 @@ for constraint in ['Bx', 'By', 'Bz']:
     plt.xlabel("t", fontsize=14)
     plt.ylabel(f"$||B_{constraint[1]}||_{{L^2}}$", fontsize=14)
     plt.yscale('log')
-    plt.ylim(1e-13 ,1e1)
-
+    #plt.ylim(1e-12 ,1e-5)
+    plt.xticks(fontsize=12)
+    plt.yticks(fontsize=12)
     plt.legend(fontsize=12)
     plt.grid(True, which="both", ls="--", lw=0.5)
     plt.tight_layout()

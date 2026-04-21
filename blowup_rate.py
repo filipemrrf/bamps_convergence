@@ -7,18 +7,28 @@ file = "temp_results/hyp_layers_cubic_wave_pconvergence-cartoon_x/hyp_layers_cub
 data = pymuninn.MuninnData(file)
 grid = data.as_grid()
 
-t = grid.ts
-psi = [grid.values[i][0] for i in range(len(grid.ts))]
+t = np.array(grid.ts)
+psi = np.array([grid.values[i][0] for i in range(len(grid.ts))])
+logpsim1 = np.log(1/psi)
 
-T_blowup, pcov = curve_fit(lambda tm, tb: (np.sqrt(2)/(tb-tm)), t[1:-1], psi[1:-1], nan_policy='raise')
-print(f"T_Blowup: {T_blowup} \t cov: {pcov}")
-tbar = []
+start = int(0.7 * len(t))
 
-for ti in t:
-    tbar.append(1.0 / (T_blowup - ti))
+Tb_local = t[start:] + np.sqrt(2)/psi[start:]
+
+# Fit quadratic trend in tail
+x = t[start:]
+y = Tb_local
+
+coeff = np.polyfit(x, y, 2)
+
+# Extrapolate to t = max(t)
+T_blowup = np.polyval(coeff, np.max(t))
+print(T_blowup)
+
+tbar = 1.0 / (T_blowup - t)
 
 plt.figure(figsize=(8, 6))
-plt.plot(tbar, psi, label="$numerics$")
+plt.plot(tbar, psi, 'o', label="$numerics$")
 plt.plot(tbar, np.sqrt(2) * np.array(tbar), '--', label="theory")
 
 plt.xscale('log')

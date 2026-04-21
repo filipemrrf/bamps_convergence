@@ -57,7 +57,7 @@ PAR_FILE.write("\n")
 PAR_FILE.write("grid = cubedball\n")
 PAR_FILE.write("\n")
 
-PAR_FILE.write("grid.cube.max         = 2\n")
+PAR_FILE.write("grid.cube.max         = 4\n")
 PAR_FILE.write("grid.cubesphere.max.x = 6\n")
 PAR_FILE.write(f"grid.sphere.max.x     = {args.scri}\n")
 PAR_FILE.write("\n")
@@ -78,7 +78,7 @@ if args.reflect:
 if args.amr:
     PAR_FILE.write("grid.amr.h = yes\n")
     PAR_FILE.write("grid.amr.p = no\n")
-    PAR_FILE.write("grid.amr.hlmax = 11\n")
+    PAR_FILE.write("grid.amr.hlmax = 10\n")
     PAR_FILE.write("\n")
 
     PAR_FILE.write("grid.amr.evolve = yes\n")
@@ -87,8 +87,8 @@ if args.amr:
 
     PAR_FILE.write("grid.amr.h.indicator = error\n")
     PAR_FILE.write("grid.amr.h.indicator.variables = u.psi\n")
-    PAR_FILE.write("grid.amr.h.indicator.min = 1e-13\n")
-    PAR_FILE.write("grid.amr.h.indicator.max = 1e-11\n")
+    PAR_FILE.write("grid.amr.h.indicator.min = 1e-12\n")
+    PAR_FILE.write("grid.amr.h.indicator.max = 1e-10\n")
     PAR_FILE.write("\n")
 
     #PAR_FILE.write("grid.amr.p.indicator = error\n")
@@ -107,7 +107,7 @@ if args.amr:
     PAR_FILE.write("grid.error.mode = smooth\n")
     PAR_FILE.write("\n")
 
-    PAR_FILE.write("grid.amr.nmax = 31\n")
+    PAR_FILE.write("grid.amr.nmax = 25\n")
     PAR_FILE.write("grid.amr.nstep = 2\n")
     PAR_FILE.write("\n")
 
@@ -164,10 +164,14 @@ PAR_FILE.write(f"hyp_wave.initialdata.gaussianshell.amp   = {args.amp}\n")
 PAR_FILE.write(f"hyp_wave.initialdata.gaussianshell.sigma = {args.sigma}\n")
 PAR_FILE.write(f"hyp_wave.initialdata.gaussianshell.r0    = 0\n")
 PAR_FILE.write(f"\n")
+#PAR_FILE.write(f"hyp_wave.initialdata.gaussianshellperturbation.amppert    = 0.1\n")
+#PAR_FILE.write(f"hyp_wave.initialdata.gaussianshellperturbation.sigmapert  = 0.5\n")
+#PAR_FILE.write(f"hyp_wave.initialdata.gaussianshellperturbation.rho0pert   = 2.5\n")
+#PAR_FILE.write(f"\n")
 
 PAR_FILE.write("hyp_wave.boundary.patch = penalty\n")
 PAR_FILE.write("hyp_wave.boundary.inner = none\n")
-PAR_FILE.write("hyp_wave.boundary.outer = none\n") #bjorhus
+PAR_FILE.write("hyp_wave.boundary.outer = none\n")
 PAR_FILE.write("\n")
 
 if args.layers:
@@ -215,7 +219,12 @@ if args.output == "convergence":
     if args.debug:
         PAR_FILE.write(f"output.1d       = u.psi u.pi u.phix u.phiy u.phiz ana.E ana.Bx ana.By ana.Bz ana.cpx ana.cmx stat.Omega stat.alpha stat.betax stat.betay stat.betaz stat.gammaxx stat.gammaxy stat.gammaxz stat.gammayy stat.gammayz stat.gammazz stat.TrChristgammax stat.TrChristgammay stat.TrChristgammaz stat.accelx stat.accely stat.accelz stat.TrK stat.dbetaxx stat.dbetaxy stat.dbetaxz stat.dbetayx stat.dbetayy stat.dbetayz stat.dbetazx stat.dbetazy stat.dbetazz stat.oomboxom stat.oom2dom2 ru.psi ru.pi ru.phix ru.phiy ru.phiz\n")
     else:
-        PAR_FILE.write(f"output.1d       = u.psi u.pi u.phix u.phiy u.phiz ana.Bx ana.By ana.Bz\n")
+        PAR_FILE.write(f"output.1d       = u.psi u.pi u.phix u.phiy u.phiz ana.Bx ana.By ana.Bz ana.cpx ana.cmx\n")
+    
+    PAR_FILE.write("\n")
+    PAR_FILE.write(f"output.2d.every  = 500\n")
+    PAR_FILE.write(f"output.2d.format = vtk\n")
+    PAR_FILE.write(f"output.2d        = u.psi u.pi u.phix u.phiy u.phiz\n")
 
 elif args.output == "blowup":
     PAR_FILE.write(f"output.0d.every    = {args.out_0d_every}\n")
